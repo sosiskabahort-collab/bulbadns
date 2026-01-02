@@ -1,0 +1,607 @@
+
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>SafeDNS - Защищенный DNS без логов</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <style>
+            :root {
+                --primary-color: #4a6de5;
+                --secondary-color: #5dcc5d;
+                --border-radius: 12px;
+                --transition: all 0.3s ease;
+            }
+            :root {
+                --bg-color: #f8f9fa;
+                --card-color: #fff;
+                --text-color: #333;
+                --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+                --footer-bg: #121212;
+                --footer-text: #f0f0f0;
+            }
+            html.dark-theme {
+                --bg-color: #121212;
+                --card-color: #1e1e1e;
+                --text-color: #f0f0f0;
+                --shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                --footer-bg: #0a0a0a;
+                --footer-text: #f0f0f0;
+            }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: "Segoe UI", system-ui, sans-serif;
+                line-height: 1.6;
+                background-color: var(--bg-color);
+                color: var(--text-color);
+                transition: var(--transition);
+                overflow-x: hidden;
+            }
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 20px;
+            }
+            header {
+                background-color: var(--card-color);
+                box-shadow: var(--shadow);
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+            }
+            .header-content {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px 0;
+            }
+            .logo {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 24px;
+                font-weight: 700;
+                color: var(--primary-color);
+            }
+            .logo i {
+                font-size: 28px;
+            }
+            .theme-toggle {
+                background: none;
+                border: none;
+                font-size: 24px;
+                color: var(--text-color);
+                cursor: pointer;
+                transition: var(--transition);
+                padding: 8px;
+                border-radius: 50%;
+                width: 48px;
+                height: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .theme-toggle:hover {
+                background-color: rgba(74, 109, 229, 0.1);
+                transform: rotate(15deg);
+            }
+            .hero {
+                padding: 80px 0 60px;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+            .hero::before {
+                content: "";
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(74, 109, 229, 0.1) 0, transparent 70%);
+                z-index: -1;
+                animation: pulse 15s infinite alternate;
+            }
+            @keyframes pulse {
+                0% {
+                    transform: translate(0, 0) scale(1);
+                }
+                100% {
+                    transform: translate(5%, 5%) scale(1.1);
+                }
+            }
+            .hero h1 {
+                font-size: 3.5rem;
+                margin-bottom: 20px;
+                background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+                animation: fadeInUp 1s ease-out;
+            }
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            .hero p {
+                font-size: 1.2rem;
+                max-width: 800px;
+                margin: 0 auto 40px;
+                color: var(--text-color);
+                opacity: 0.9;
+                animation: fadeInUp 1s ease-out 0.2s both;
+            }
+            .features {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 30px;
+                margin-top: 40px;
+                animation: fadeInUp 1s ease-out 0.4s both;
+            }
+            .feature {
+                flex: 1;
+                min-width: 250px;
+                max-width: 300px;
+                background-color: var(--card-color);
+                padding: 30px;
+                border-radius: var(--border-radius);
+                box-shadow: var(--shadow);
+                transition: var(--transition);
+            }
+            .feature:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            }
+            .feature i {
+                font-size: 40px;
+                margin-bottom: 20px;
+                color: var(--primary-color);
+            }
+            .feature h3 {
+                margin-bottom: 15px;
+                font-size: 1.5rem;
+            }
+            .dns-section {
+                padding: 80px 0;
+                background-color: var(--bg-color);
+            }
+            .section-title {
+                text-align: center;
+                font-size: 2.5rem;
+                margin-bottom: 50px;
+                position: relative;
+                display: inline-block;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .section-title::after {
+                content: "";
+                position: absolute;
+                bottom: -10px;
+                left: 25%;
+                width: 50%;
+                height: 4px;
+                background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+                border-radius: 2px;
+            }
+            .dns-cards {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 30px;
+                justify-content: center;
+            }
+            .dns-card {
+                background-color: var(--card-color);
+                border-radius: var(--border-radius);
+                padding: 30px;
+                flex: 1;
+                min-width: 300px;
+                max-width: 500px;
+                box-shadow: var(--shadow);
+                transition: var(--transition);
+                position: relative;
+                overflow: hidden;
+            }
+            .dns-card:hover {
+                transform: translateY(-5px);
+            }
+            .dns-card::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 5px;
+                background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            }
+            .dns-card h3 {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .dns-card p {
+                margin-bottom: 20px;
+                opacity: 0.9;
+            }
+            .dns-address {
+                background-color: rgba(74, 109, 229, 0.1);
+                padding: 15px;
+                border-radius: 8px;
+                font-family: "Courier New", monospace;
+                font-size: 1.2rem;
+                margin-bottom: 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                word-break: break-all;
+            }
+            .copy-btn {
+                background-color: var(--primary-color);
+                color: #fff;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+                transition: var(--transition);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-shrink: 0;
+            }
+            .copy-btn:hover {
+                background-color: #3a5bd9;
+                transform: scale(1.05);
+            }
+            .copy-btn.copied {
+                background-color: var(--secondary-color);
+            }
+            .instructions {
+                padding: 80px 0;
+                background-color: var(--card-color);
+            }
+            .instructions-container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            .instructions h3 {
+                font-size: 1.8rem;
+                margin-bottom: 30px;
+                text-align: center;
+            }
+            .instruction-step {
+                margin-bottom: 40px;
+                opacity: 0;
+                transform: translateY(20px);
+                transition:
+                    opacity 0.5s ease,
+                    transform 0.5s ease;
+            }
+            .instruction-step.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            .instruction-step h4 {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: var(--primary-color);
+            }
+            .instruction-step p {
+                margin-bottom: 15px;
+            }
+            footer {
+                background-color: var(--footer-bg);
+                color: var(--footer-text);
+                padding: 50px 0 20px;
+            }
+            .footer-content {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                gap: 40px;
+                margin-bottom: 40px;
+            }
+            .footer-section {
+                flex: 1;
+                min-width: 250px;
+            }
+            .footer-section h3 {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+                color: #fff;
+            }
+            .footer-section p,
+            .footer-section a {
+                color: rgba(255, 255, 255, 0.8);
+                margin-bottom: 10px;
+                display: block;
+                text-decoration: none;
+                transition: var(--transition);
+            }
+            .footer-section a:hover {
+                color: var(--primary-color);
+                padding-left: 5px;
+            }
+            .copyright {
+                text-align: center;
+                padding-top: 20px;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                color: rgba(255, 255, 255, 0.6);
+                font-size: 0.9rem;
+            }
+            @media (max-width: 768px) {
+                .hero h1 {
+                    font-size: 2.5rem;
+                }
+                .hero p {
+                    font-size: 1.1rem;
+                    padding: 0 10px;
+                }
+                .features {
+                    flex-direction: column;
+                    align-items: center;
+                }
+                .dns-cards {
+                    flex-direction: column;
+                }
+                .dns-card {
+                    min-width: 100%;
+                }
+                .dns-address {
+                    flex-direction: column;
+                    gap: 15px;
+                    text-align: center;
+                }
+                .footer-content {
+                    flex-direction: column;
+                }
+            }
+            @media (max-width: 480px) {
+                .hero h1 {
+                    font-size: 2rem;
+                }
+                .section-title {
+                    font-size: 2rem;
+                }
+                .dns-card h3 {
+                    font-size: 1.5rem;
+                }
+                .dns-address {
+                    font-size: 1rem;
+                }
+            }
+        </style>
+        <script>
+            !(function () {
+                var e = localStorage.getItem("theme"),
+                    t = window.matchMedia("(prefers-color-scheme: dark)").matches,
+                    a = e || (t ? "dark" : "light");
+                a === "dark"
+                    ? document.documentElement.classList.add("dark-theme")
+                    : document.documentElement.classList.remove("dark-theme");
+            })();
+        </script>
+    </head>
+    <body>
+        <header>
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo"><i class="fas fa-shield-alt"></i><span>SafeDNS</span></div>
+                    <button class="theme-toggle" id="themeToggle" aria-label="Переключить тему">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+        <section class="hero">
+            <div class="container">
+                <h1>Безопасный DNS нового поколения</h1>
+                <p>
+                    Защитите своё интернет-соединение с помощью нашего шифрованного DNS-сервиса, который не ведёт логи,
+                    блокирует рекламу, трекеры и вредоносные сайты.
+                </p>
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-lock"></i>
+                        <h3>Полная конфиденциальность</h3>
+                        <p>Мы не ведём журналы вашей интернет-активности. Ваши данные остаются только вашими.</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-ad"></i>
+                        <h3>Блокировка рекламы</h3>
+                        <p>Наслаждайтесь чистым интернетом без навязчивой рекламы и всплывающих окон.</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-user-secret"></i>
+                        <h3>Защита от трекеров</h3>
+                        <p>
+                            Предотвращаем отслеживание вашей онлайн-активности рекламными сетями и аналитическими
+                            сервисами.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="dns-section">
+            <div class="container">
+                <h2 class="section-title">Наши DNS-серверы</h2>
+                <div class="dns-cards">
+                    <div class="dns-card">
+                        <h3><i class="fas fa-bolt"></i> Основной DNS (IPv4)</h3>
+                        <p>Быстрый и надежный DNS-сервер для ежедневного использования.</p>
+                        <div class="dns-address">
+                            <span id="dns1">94.140.14.14</span
+                            ><button class="copy-btn" data-copy="94.140.14.14">
+                                <i class="far fa-copy"></i> Копировать
+                            </button>
+                        </div>
+                        <div class="dns-address">
+                            <span id="dns2">94.140.15.15</span
+                            ><button class="copy-btn" data-copy="94.140.15.15">
+                                <i class="far fa-copy"></i> Копировать
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dns-card">
+                        <h3><i class="fas fa-globe"></i> Основной DNS (IPv6)</h3>
+                        <p>Для пользователей с поддержкой IPv6. Такая же защита и скорость.</p>
+                        <div class="dns-address">
+                            <span id="dns3">2a10:50c0::ad1:ff</span
+                            ><button class="copy-btn" data-copy="2a10:50c0::ad1:ff">
+                                <i class="far fa-copy"></i> Копировать
+                            </button>
+                        </div>
+                        <div class="dns-address">
+                            <span id="dns4">2a10:50c0::ad2:ff</span
+                            ><button class="copy-btn" data-copy="2a10:50c0::ad2:ff">
+                                <i class="far fa-copy"></i> Копировать
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="instructions">
+            <div class="container">
+                <div class="instructions-container">
+                    <h2 class="section-title">Как настроить SafeDNS</h2>
+                    <div class="instruction-step" id="step1">
+                        <h4><i class="fas fa-mobile-alt"></i> На мобильном устройстве (Android/iOS)</h4>
+                        <p>1. Откройте настройки Wi-Fi или сотовой сети</p>
+                        <p>2. Нажмите на активное соединение и выберите "Изменить сеть"</p>
+                        <p>3. В расширенных настройках найдите пункт "DNS"</p>
+                        <p>4. Введите один из наших DNS-адресов и сохраните изменения</p>
+                    </div>
+                    <div class="instruction-step" id="step2">
+                        <h4><i class="fas fa-desktop"></i> На компьютере (Windows/Mac)</h4>
+                        <p>1. Откройте настройки сети</p>
+                        <p>2. Выберите активное подключение и нажмите "Свойства"</p>
+                        <p>3. Найдите настройки IPv4/IPv6</p>
+                        <p>4. Установите "Использовать следующие адреса DNS"</p>
+                        <p>5. Введите наши DNS-адреса и примените изменения</p>
+                    </div>
+                    <div class="instruction-step" id="step3">
+                        <h4><i class="fas fa-router"></i> На роутере</h4>
+                        <p>1. Откройте веб-интерфейс роутера (обычно 192.168.1.1)</p>
+                        <p>2. Перейдите в настройки DHCP или DNS</p>
+                        <p>3. Замените DNS-адреса на наши</p>
+                        <p>4. Сохраните настройки и перезагрузите роутер</p>
+                        <p>5. Все устройства в вашей сети будут автоматически защищены</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>SafeDNS</h3>
+                        <p>Безопасный, приватный и быстрый DNS-сервис для всех ваших устройств.</p>
+                        <p>Мы верим в свободный и приватный интернет для каждого.</p>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Особенности</h3>
+                        <a href="#">Шифрование DNS-запросов</a><a href="#">Блокировка рекламы</a
+                        ><a href="#">Защита от трекеров</a><a href="#">Без логирования</a>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Контакты</h3>
+                        <p>Поддержка: support@safedns.example</p>
+                        <p>Сотрудничество: partner@safedns.example</p>
+                        <p>Технические вопросы: tech@safedns.example</p>
+                    </div>
+                </div>
+                <div class="copyright">
+                    <p>&copy; 2023 SafeDNS. Все права защищены. Мы не собираем и не храним ваши персональные данные.</p>
+                </div>
+            </div>
+        </footer>
+        <script>
+            const e = document.getElementById("themeToggle"),
+                t = e.querySelector("i"),
+                n = document.documentElement;
+            function o(s) {
+                s === "dark" ? n.classList.add("dark-theme") : n.classList.remove("dark-theme"),
+                    (t.className = s === "dark" ? "fas fa-sun" : "fas fa-moon"),
+                    localStorage.setItem("theme", s);
+            }
+            localStorage.getItem("theme")
+                ? o(localStorage.getItem("theme"))
+                : o(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
+                e.addEventListener("click", () => {
+                    o(n.classList.contains("dark-theme") ? "light" : "dark");
+                }),
+                window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (s) => {
+                    localStorage.getItem("theme") || o(s.matches ? "dark" : "light");
+                });
+            document.querySelectorAll(".copy-btn").forEach((s) => {
+                s.addEventListener("click", function () {
+                    const a = this.getAttribute("data-copy"),
+                        c = this.innerHTML;
+                    navigator.clipboard
+                        .writeText(a)
+                        .then(() => {
+                            this.classList.add("copied"), (this.innerHTML = '<i class="fas fa-check"></i> Скопировано');
+                            setTimeout(() => {
+                                this.classList.remove("copied"), (this.innerHTML = c);
+                            }, 2e3);
+                        })
+                        .catch(() => {
+                            const r = document.createElement("textarea");
+                            (r.value = a), document.body.appendChild(r), r.select();
+                            try {
+                                document.execCommand("copy"),
+                                    this.classList.add("copied"),
+                                    (this.innerHTML = '<i class="fas fa-check"></i> Скопировано'),
+                                    setTimeout(() => {
+                                        this.classList.remove("copied"), (this.innerHTML = c);
+                                    }, 2e3);
+                            } catch (i) {
+                                alert("Не удалось скопировать адрес. Скопируйте его вручную: " + a);
+                            }
+                            document.body.removeChild(r);
+                        });
+                });
+            });
+            const d = new IntersectionObserver(
+                (s) => {
+                    s.forEach((r) => {
+                        r.isIntersecting && r.target.classList.add("visible");
+                    });
+                },
+                { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+            );
+            document.querySelectorAll(".instruction-step").forEach((s) => {
+                d.observe(s);
+            }),
+                window.addEventListener("load", () => {
+                    document.querySelectorAll(".feature").forEach((s, r) => {
+                        s.style.animationDelay = `${r * 0.1}s`;
+                    }),
+                        document.getElementById("step1").classList.add("visible");
+                }),
+                window.addEventListener("scroll", () => {
+                    document.querySelectorAll(".instruction-step").forEach((s) => {
+                        s.getBoundingClientRect().top < window.innerHeight * 0.8 && s.classList.add("visible");
+                    });
+                });
+        </script>
+    </body>
+</html>
